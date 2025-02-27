@@ -81,7 +81,7 @@ def get_model_configs():
                 'classifier__C': [0.001, 0.1, 1],
                 'classifier__kernel': ['linear', 'rbf', 'sigmoid'],
                 'classifier__gamma': ['scale', 'auto'],
-                'classifier__max_iter':[500,1000]
+                'classifier__max_iter':[100,300]
             }
         },
         'Random Forest': {
@@ -90,10 +90,11 @@ def get_model_configs():
                 ('classifier', RandomForestClassifier())
             ]),
             'params': {
-                'classifier__n_estimators':[100,500],
-                'classifier__max_depth': [None, 10, 20],
-                'classifier__min_samples_split': [2,5,10],
-                'classifier__min_samples_leaf':[1,2,4],
+                'classifier__n_estimators':[100,300],
+                'classifier__max_depth': [10, 20],
+                'classifier__min_samples_split': [2,10],
+                'classifier__min_samples_leaf':[2,4],
+                'classifier__max_max_features':["sqrt","log2"],
             }
         },
         'XGBoost':{
@@ -102,10 +103,10 @@ def get_model_configs():
             ('classifier', XGBClassifier())
             ]),
             'params':{
-                'classifier__n_estimators': [100, 300],
+                'classifier__n_estimators': [100,300],
                 'classifier__learning_rate': [0.01, 0.05, 0.1],
-                'classifier__max_depth': [3, 5, 7],
-                'classifier__min_child_weight': [1, 3, 5],
+                'classifier__max_depth': [3,7],
+                'classifier__min_child_weight': [3, 5],
             }
         }
     }
@@ -130,15 +131,16 @@ def train_model(trial, X_train, y_train, model_name):
             'classifier__C': trial.suggest_float('classifier__C', 0.001,1, log=True),
             'classifier__kernel': trial.suggest_categorical('classifier__kernel', ['linear', 'rbf', 'sigmoid']),
             'classifier__gamma': trial.suggest_categorical('classifier__gamma', ['scale', 'auto']),
-            'classifier__max_iter': trial.suggest_int('classifier__max_iter',500,1000)
+            'classifier__max_iter': trial.suggest_int('classifier__max_iter',100,300)
         }
     
     elif model_name == 'Random Forest':
          params = {
-            'classifier__n_estimators': trial.suggest_int('classifier__n_estimators', 100,500),
-            'classifier__max_depth': trial.suggest_categorical('classifier__max_depth', [None, 10, 20]),
+            'classifier__n_estimators': trial.suggest_int('classifier__n_estimators', 100,300),
+            'classifier__max_depth': trial.suggest_categorical('classifier__max_depth', [10, 20]),
             'classifier__min_samples_split': trial.suggest_int('classifier__min_samples_split', 2, 10),
-            'classifier__min_samples_leaf': trial.suggest_int('classifier__min_samples_leaf', 1, 4)
+            'classifier__min_samples_leaf': trial.suggest_int('classifier__min_samples_leaf', 2, 4),
+            'classifier__max_features':trail.suggest_categorical("max_features", ["sqrt", "log2"]),
         }
     elif model_name == 'XGBoost':
          params = {
