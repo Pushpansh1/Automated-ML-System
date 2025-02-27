@@ -106,7 +106,6 @@ def get_model_configs():
                 'classifier__learning_rate': [0.01, 0.05, 0.1],
                 'classifier__max_depth': [3, 5, 7],
                 'classifier__min_child_weight': [1, 3, 5],
-                'classifier__subsample': [0.8, 1.0]               
             }
         }
     }
