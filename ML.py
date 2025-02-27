@@ -95,18 +95,6 @@ def get_model_configs():
                 'classifier__min_samples_split': [2,10],
                 'classifier__min_samples_leaf':[2,4],
             }
-        },
-        'XGBoost':{
-            'pipeline':Pipeline([
-            ('scaled', StandardScaler()),
-            ('classifier', XGBClassifier())
-            ]),
-            'params':{
-                'classifier__n_estimators': [100,300],
-                'classifier__learning_rate': [0.01, 0.05, 0.1],
-                'classifier__max_depth': [3,7],
-                'classifier__min_child_weight': [3, 5],
-            }
         }
     }
     return models
@@ -139,15 +127,7 @@ def train_model(trial, X_train, y_train, model_name):
             'classifier__max_depth': trial.suggest_categorical('classifier__max_depth', [10, 20]),
             'classifier__min_samples_split': trial.suggest_int('classifier__min_samples_split', 2, 10),
             'classifier__min_samples_leaf': trial.suggest_int('classifier__min_samples_leaf', 2, 4),
-        }
-    elif model_name == 'XGBoost':
-         params = {
-            'classifier__n_estimators': trial.suggest_int('classifier__n_estimators', 100, 300),
-            'classifier__learning_rate': trial.suggest_float('classifier__learning_rate', 0.01, 0.1, log=True),
-            'classifier__max_depth': trial.suggest_int('classifier__max_depth', 3, 7),
-            'classifier__min_child_weight': trial.suggest_int('classifier__min_child_weight', 3, 5)
-        }
-    
+        } 
     pipeline = model_config['pipeline'].set_params(**params)
     pipeline.fit(X_train, y_train)
     
@@ -166,36 +146,25 @@ def auto_train(X_train, y_train, X_test, y_test):
     progress_bars = {model_name: progress_cols[i].progress(0.0) for i, model_name in enumerate(models)}
 
     for model_name in models.keys():
-        st.write(f"🛠 Training {model_name}...")
+        with st.spinner(f"🛠 Training {model_name}..."):
+            study = optuna.create_study(direction='maximize')
+            study.optimize(lambda trial: train_model(trial, X_train, y_train, model_name), n_trials=20)
+            best_params = study.best_params
+            pipeline = models[model_name]['pipeline'].set_params(**best_params)
+            pipeline.fit(X_train, y_train)
+            y_pred = pipeline.predict(X_test)
+            test_accuracy = accuracy_score(y_test, y_pred)
+            results[model_name] = {
+                'model': pipeline,
+                'cv_score': study.best_value,
+                'test_accuracy': test_accuracy
+            }
 
-        # Run Optuna optimization
-        study = optuna.create_study(direction='maximize')
-        study.optimize(lambda trial: train_model(trial, X_train, y_train, model_name), n_trials=20)
-
-        # Retrieve best parameters and train model
-        best_params = study.best_params
-        pipeline = models[model_name]['pipeline'].set_params(**best_params)
-        pipeline.fit(X_train, y_train)
-
-        # Evaluate model
-        y_pred = pipeline.predict(X_test)
-        test_accuracy = accuracy_score(y_test, y_pred)
-
-        results[model_name] = {
-            'model': pipeline,
-            'cv_score': study.best_value,
-            'test_accuracy': test_accuracy
-        }
-
-        progress_bars[model_name].progress(1.0)
-
-        # Track best model
-        if test_accuracy > best_score:
-            best_score = test_accuracy
-            best_model = pipeline
-            best_model_name = model_name
-
-    # Display results
+            progress_bars[model_name].progress(1.0)
+            if test_accuracy > best_score:
+                best_score = test_accuracy
+                best_model = pipeline
+                best_model_name = model_name
     results_df = pd.DataFrame({
         'Model': list(results.keys()),
         'Cross-Validation Score': [results[model]['cv_score'] for model in results],
