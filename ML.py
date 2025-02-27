@@ -145,7 +145,7 @@ def train_model(trial, X_train, y_train, model_name):
             'classifier__n_estimators': trial.suggest_int('classifier__n_estimators', 100, 300),
             'classifier__learning_rate': trial.suggest_float('classifier__learning_rate', 0.01, 0.1, log=True),
             'classifier__max_depth': trial.suggest_int('classifier__max_depth', 3, 7),
-            'classifier__min_child_weight': trial.suggest_int('classifier__min_child_weight', 1, 5)
+            'classifier__min_child_weight': trial.suggest_int('classifier__min_child_weight', 3, 5)
         }
     
     pipeline = model_config['pipeline'].set_params(**params)
