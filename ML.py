@@ -143,7 +143,7 @@ def objective(trial, X_train, y_train, model_name):
             'classifier__penalty': trial.suggest_categorical('classifier__penalty', ['l1', 'l2']),
             'classifier__C': trial.suggest_float('classifier__C', 0.01, 1.0, log=True),
             'classifier__solver': trial.suggest_categorical('classifier__solver', ['liblinear', 'saga']),
-            'classifier__max_iter': trial.suggest_int('classifier__max_iter', 100, 200)
+            'classifier__max_iter': trial.suggest_int('classifier__max_iter', 100,300)
         }
     
     elif model_name == 'Support Vector Machine':
@@ -151,12 +151,12 @@ def objective(trial, X_train, y_train, model_name):
             'classifier__C': trial.suggest_float('classifier__C', 0.001, 1.0, log=True),
             'classifier__kernel': trial.suggest_categorical('classifier__kernel', ['linear', 'rbf', 'sigmoid']),
             'classifier__gamma': trial.suggest_categorical('classifier__gamma', ['scale', 'auto', 0.01, 0.1, 1]),
-            'classifier__max_iter': trial.suggest_int('classifier__max_iter', 100, 200)
+            'classifier__max_iter': trial.suggest_int('classifier__max_iter',500,1000)
         }
     
     elif model_name == 'Random Forest':
          params = {
-            'classifier__n_estimators': trial.suggest_int('classifier__n_estimators', 100, 200),
+            'classifier__n_estimators': trial.suggest_int('classifier__n_estimators', 100,500),
             'classifier__max_depth': trial.suggest_categorical('classifier__max_depth', [None, 10, 20]),
             'classifier__min_samples_split': trial.suggest_int('classifier__min_samples_split', 2, 10),
             'classifier__min_samples_leaf': trial.suggest_int('classifier__min_samples_leaf', 1, 4)
