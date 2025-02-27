@@ -27,5 +27,3 @@ An automated machine learning application built with Streamlit that helps users 
    ```
    streamlit run main.py
    ```
-
-## Project Structure
