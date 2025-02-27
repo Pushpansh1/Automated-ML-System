@@ -1,4 +1,5 @@
 import streamlit as st
+import warnings
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split,cross_val_score,GridSearchCV
@@ -16,7 +17,9 @@ import joblib
 import plotly.express as px
 import seaborn as sns
 import matplotlib.pyplot as plt
-
+from sklearn.exceptions import ConvergenceWarning
+warnings.simplefilter("ignore", ConvergenceWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 st.set_page_config(page_title="ML Model Deployment", layout="wide")
 
 def load_data(file):
