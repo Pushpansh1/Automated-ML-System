@@ -140,7 +140,7 @@ def train_model(trial, X_train, y_train, model_name):
             'classifier__max_depth': trial.suggest_categorical('classifier__max_depth', [10, 20]),
             'classifier__min_samples_split': trial.suggest_int('classifier__min_samples_split', 2, 10),
             'classifier__min_samples_leaf': trial.suggest_int('classifier__min_samples_leaf', 2, 4),
-            'classifier__max_features':trail.suggest_categorical("max_features", ["sqrt", "log2"]),
+            'classifier__max_features':trial.suggest_categorical("max_features", ["sqrt", "log2"]),
         }
     elif model_name == 'XGBoost':
          params = {
