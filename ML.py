@@ -195,9 +195,9 @@ def evaluate_models(X_train, X_test, y_train, y_test):
         y_prob = model.predict_proba(X_test)[:, 1] if hasattr(model, "predict_proba") else None
         
         accuracy = accuracy_score(y_test, y_pred)
-        precision = precision_score(y_test, y_pred, average='binary')
-        recall = recall_score(y_test, y_pred, average='binary')
-        f1 = f1_score(y_test, y_pred, average='binary')
+        precision = precision_score(y_test, y_pred)
+        recall = recall_score(y_test, y_pred)
+        f1 = f1_score(y_test, y_pred)
         roc_auc = roc_auc_score(y_test, y_prob) if y_prob is not None else None
         
         results[name] = {
