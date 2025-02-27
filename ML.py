@@ -75,7 +75,7 @@ def get_model_configs():
         'Support Vector Machine': {
             'pipeline': Pipeline([
                 ('scaler', StandardScaler()),
-                ('classifier', SVC(probability=True))
+                ('classifier', SVC())
             ]),
             'params': {
                 'classifier__C': [0.001, 0.1, 1,10],
@@ -96,10 +96,10 @@ def get_model_configs():
                 'classifier__min_samples_leaf':[1,2,4],
             }
         },
-        'XgBoost':{
+        'XGBoost':{
             'pipeline':Pipeline([
             ('scaled', StandardScaler()),
-            ('classifier',XGBClassifier(eval_metric='logloss'))
+            ('classifier', XGBClassifier())
             ]),
             'params':{
                 'classifier__n_estimators': [100, 300],
@@ -111,27 +111,7 @@ def get_model_configs():
         }
     }
     return models
-
-def train_model(X_train, y_train, selected_model, progress_bar=None):
-    models = get_model_configs()
-    model_config = models[selected_model]
-    
-    with st.spinner(f"Training {selected_model}..."):
-        grid_search = GridSearchCV(
-            estimator=model_config['pipeline'],
-            param_grid=model_config['params'],
-            cv=5,
-            n_jobs=-1,
-            verbose=0,
-            scoring="accuracy"
-        )
-        grid_search.fit(X_train, y_train)
-        
-        if progress_bar:
-            progress_bar.progress(1.0)
-        
-        return grid_search.best_estimator_, grid_search.best_score_
-def objective(trial, X_train, y_train, model_name):
+def train_model(trial, X_train, y_train, model_name):
     models = get_model_configs()
     model_config = models[model_name]
     dataset_size = len(X_train)
@@ -191,7 +171,7 @@ def auto_train(X_train, y_train, X_test, y_test):
 
         # Run Optuna optimization
         study = optuna.create_study(direction='maximize')
-        study.optimize(lambda trial: objective(trial, X_train, y_train, model_name), n_trials=20)
+        study.optimize(lambda trial: train_model(trial, X_train, y_train, model_name), n_trials=20)
 
         # Retrieve best parameters and train model
         best_params = study.best_params
