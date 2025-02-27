@@ -95,8 +95,8 @@ def get_model_configs():
         },
         'XgBoost':{
             'pipeline':Pipeline([
-            ('scaled',StandardScaler()),
-            ('classifier',XGBClassifier(use_label_encoder=False,eval_metric='logloss'))
+            ('scaled', StandardScaler()),
+            ('classifier',XGBClassifier(eval_metric='logloss'))
             ]),
             'params':{
                 'classifier__n_estimators': [100, 200],
