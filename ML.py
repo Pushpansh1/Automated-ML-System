@@ -67,7 +67,7 @@ def get_model_configs():
             ]),
             'params': {
                 'classifier__penalty':['l1','l2'],
-                'classifier__C':[0.01,0.1,1,10],
+                'classifier__C':[0.01,0.1,1],
                 'classifier__max_iter': [100,300],
                 'classifier__solver':['liblinear','saga']
             }
@@ -78,9 +78,9 @@ def get_model_configs():
                 ('classifier', SVC())
             ]),
             'params': {
-                'classifier__C': [0.001, 0.1, 1,10],
+                'classifier__C': [0.001, 0.1, 1],
                 'classifier__kernel': ['linear', 'rbf', 'sigmoid'],
-                'classifier__gamma': ['scale', 'auto', 0.01, 0.1, 1],
+                'classifier__gamma': ['scale', 'auto'],
                 'classifier__max_iter':[500,1000]
             }
         },
@@ -120,16 +120,16 @@ def train_model(trial, X_train, y_train, model_name):
     if model_name == 'Logistic Regression':
         params = {
             'classifier__penalty': trial.suggest_categorical('classifier__penalty', ['l1', 'l2']),
-            'classifier__C': trial.suggest_float('classifier__C', 0.01, 1.0, log=True),
+            'classifier__C': trial.suggest_float('classifier__C', 0.01,1, log=True),
             'classifier__solver': trial.suggest_categorical('classifier__solver', ['liblinear', 'saga']),
             'classifier__max_iter': trial.suggest_int('classifier__max_iter', 100,300)
         }
     
     elif model_name == 'Support Vector Machine':
         params = {
-            'classifier__C': trial.suggest_float('classifier__C', 0.001, 1.0, log=True),
+            'classifier__C': trial.suggest_float('classifier__C', 0.001,1, log=True),
             'classifier__kernel': trial.suggest_categorical('classifier__kernel', ['linear', 'rbf', 'sigmoid']),
-            'classifier__gamma': trial.suggest_categorical('classifier__gamma', ['scale', 'auto', 0.01, 0.1, 1]),
+            'classifier__gamma': trial.suggest_categorical('classifier__gamma', ['scale', 'auto']),
             'classifier__max_iter': trial.suggest_int('classifier__max_iter',500,1000)
         }
     
@@ -143,9 +143,9 @@ def train_model(trial, X_train, y_train, model_name):
     elif model_name == 'XGBoost':
          params = {
             'classifier__n_estimators': trial.suggest_int('classifier__n_estimators', 100, 300),
-            'classifier__learning_rate': trial.suggest_float('classifier__learning_rate', 0.01, 0.2, log=True),
-            'classifier__max_depth': trial.suggest_int('classifier__max_depth', 3, 10),
-            'classifier__min_child_weight': trial.suggest_int('classifier__min_child_weight', 1, 6)
+            'classifier__learning_rate': trial.suggest_float('classifier__learning_rate', 0.01, 0.1, log=True),
+            'classifier__max_depth': trial.suggest_int('classifier__max_depth', 3, 7),
+            'classifier__min_child_weight': trial.suggest_int('classifier__min_child_weight', 1, 5)
         }
     
     pipeline = model_config['pipeline'].set_params(**params)
