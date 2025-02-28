@@ -453,7 +453,7 @@ def main():
                     y_pred = pipeline.predict(X_test)
                     y_prob = pipeline.predict_proba(X_test)[:, 1] if hasattr(pipeline, "predict_proba") else None
                 
-                    accuracy = accuracy_score(y_test, y_pred)
+                    accuracy = accuracy_score(y_test, y_pred,accura)
                     precision = precision_score(y_test, y_pred)
                     recall = recall_score(y_test, y_pred)
                     f1 = f1_score(y_test, y_pred)
