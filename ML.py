@@ -183,22 +183,38 @@ def get_classification_report(y_true, y_pred):
     df = pd.DataFrame(report_dict).transpose()
     return df
 def evaluate_models(X_train, X_test, y_train, y_test):
-    models =get_model_configs()
+    models = get_model_configs()
     
     results = {}
 
     plt.figure(figsize=(10, 6))
     
+    num_classes = len(set(y_test))  # Determine if the target is binary or multiclass
+
     for name, model in models.items():
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
-        y_prob = model.predict_proba(X_test)[:, 1] if hasattr(model, "predict_proba") else None
+        
+        # Handle predict_proba for multiclass classification
+        if hasattr(model, "predict_proba"):
+            y_prob = model.predict_proba(X_test)
+            if num_classes == 2:
+                y_prob = y_prob[:, 1]  # Binary classification
+            else:
+                y_prob = None  # Ignore for multiclass
+        else:
+            y_prob = None  # If the model doesn't support predict_proba
+
+        # Adjust 'average' based on the number of classes
+        average_type = 'binary' if num_classes == 2 else 'weighted'
         
         accuracy = accuracy_score(y_test, y_pred)
-        precision = precision_score(y_test, y_pred)
-        recall = recall_score(y_test, y_pred)
-        f1 = f1_score(y_test, y_pred)
-        roc_auc = roc_auc_score(y_test, y_prob) if y_prob is not None else None
+        precision = precision_score(y_test, y_pred, average=average_type)
+        recall = recall_score(y_test, y_pred, average=average_type)
+        f1 = f1_score(y_test, y_pred, average=average_type)
+        
+        # ROC-AUC only for binary classification
+        roc_auc = roc_auc_score(y_test, y_prob) if y_prob is not None and num_classes == 2 else None
         
         results[name] = {
             "Accuracy": accuracy,
@@ -208,16 +224,17 @@ def evaluate_models(X_train, X_test, y_train, y_test):
             "ROC-AUC": roc_auc
         }
 
-        if y_prob is not None:
+        if y_prob is not None and num_classes == 2:  # ROC curve only for binary
             fpr, tpr, _ = roc_curve(y_test, y_prob)
             plt.plot(fpr, tpr, label=f"{name} (AUC = {roc_auc:.2f})")
 
-    plt.plot([0, 1], [0, 1], linestyle="--", color="gray")
-    plt.xlabel("False Positive Rate")
-    plt.ylabel("True Positive Rate")
-    plt.title("ROC Curves")
-    plt.legend()
-    plt.show()
+    if num_classes == 2:  # Plot ROC curve only for binary classification
+        plt.plot([0, 1], [0, 1], linestyle="--", color="gray")
+        plt.xlabel("False Positive Rate")
+        plt.ylabel("True Positive Rate")
+        plt.title("ROC Curves")
+        plt.legend()
+        plt.show()
     
     fig, axes = plt.subplots(2, 2, figsize=(12, 10))
     for ax, (name, model) in zip(axes.ravel(), models.items()):
